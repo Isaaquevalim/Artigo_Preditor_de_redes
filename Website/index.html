@@ -358,29 +358,29 @@ xgb.fit(X_train, y_train)</code></pre>
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr class="highlight-row">
                 <td><strong>Árvore de Decisão</strong></td>
-                <td>[PREENCHER]</td>
-                <td>[PREENCHER]</td>
-                <td>[PREENCHER]</td>
-                <td>[PREENCHER]</td>
-                <td>[PREENCHER]</td>
+                <td><strong>1,0000</strong></td>
+                <td><strong>0,9615</strong></td>
+                <td><strong>0,9804</strong></td>
+                <td><strong>0,0049</strong></td>
+                <td><strong>2,03</strong></td>
               </tr>
               <tr>
                 <td><strong>Random Forest</strong></td>
-                <td>[PREENCHER]</td>
-                <td>[PREENCHER]</td>
-                <td>[PREENCHER]</td>
-                <td>[PREENCHER]</td>
-                <td>[PREENCHER]</td>
+                <td>1,0000</td>
+                <td>0,9615</td>
+                <td>0,9804</td>
+                <td>0,3840</td>
+                <td>39,55</td>
               </tr>
-              <tr class="highlight-row">
+              <tr>
                 <td><strong>XGBoost</strong></td>
-                <td><strong>[PREENCHER]</strong></td>
-                <td><strong>[PREENCHER]</strong></td>
-                <td><strong>[PREENCHER]</strong></td>
-                <td><strong>[PREENCHER]</strong></td>
-                <td><strong>[PREENCHER]</strong></td>
+                <td>1,0000</td>
+                <td>0,9615</td>
+                <td>0,9804</td>
+                <td>0,6027</td>
+                <td>7,31</td>
               </tr>
             </tbody>
           </table>
@@ -395,30 +395,30 @@ xgb.fit(X_train, y_train)</code></pre>
           <li><strong>Custo do Falso Positivo (FP — Alarme falso):</strong> O modelo aponta risco de falha em uma oscilação inofensiva. Gera verificação preventiva ou reroteamento cautelar, mas não derruba a operação.</li>
         </ul>
 
-        <figure class="diagram-box" role="img" aria-label="Matriz de Confusão do modelo vencedor detalhando Verdadeiros Negativos, Falsos Positivos, Falsos Negativos e Verdadeiros Positivos na previsão de falhas.">
+        <figure class="diagram-box" role="img" aria-label="Matriz de Confusão (idêntica nos três modelos) detalhando Verdadeiros Negativos, Falsos Positivos, Falsos Negativos e Verdadeiros Positivos na previsão de falhas.">
           <div class="confusion-grid">
             <div class="cm-cell cm-tn">
               <span class="cm-title">Verdadeiro Negativo (VN)</span>
-              <strong class="cm-value">[PREENCHER]</strong>
+              <strong class="cm-value">174</strong>
               <small>Enlace normal previsto corretamente</small>
             </div>
             <div class="cm-cell cm-fp">
               <span class="cm-title">Falso Positivo (FP)</span>
-              <strong class="cm-value">[PREENCHER]</strong>
+              <strong class="cm-value">0</strong>
               <small>Alarme falso de degradação</small>
             </div>
             <div class="cm-cell cm-fn">
               <span class="cm-title">Falso Negativo (FN) 🚨</span>
-              <strong class="cm-value">[PREENCHER]</strong>
+              <strong class="cm-value">1</strong>
               <small>Crítico: Falha real não prevista!</small>
             </div>
             <div class="cm-cell cm-tp">
               <span class="cm-title">Verdadeiro Positivo (VP)</span>
-              <strong class="cm-value">[PREENCHER]</strong>
+              <strong class="cm-value">25</strong>
               <small>Falha/Congestionamento previsto a tempo</small>
             </div>
           </div>
-          <figcaption>Figura 3: Matriz de confusão no conjunto de teste evidenciando o controle sobre Falsos Negativos. Elaboração própria.</figcaption>
+          <figcaption>Figura 3: Matriz de confusão no conjunto de teste (200 amostras, 26 falhas reais). Os três modelos produziram exatamente a mesma matriz. Elaboração própria.</figcaption>
         </figure>
       </section>
 
@@ -426,13 +426,13 @@ xgb.fit(X_train, y_train)</code></pre>
       <section id="recomendacao" class="section-block">
         <h2>6. Recomendação para o Preditor de Redes e Limitações</h2>
         <div class="recommendation-box">
-          <h3>🏆 Escolha do Grupo: [PREENCHER: ex. XGBoost]</h3>
+          <h3>🏆 Escolha do Grupo: Árvore de Decisão</h3>
           <p>
-            Justificamos a escolha do <strong>[XGBoost / Random Forest]</strong> para operar no preditor de redes com base nos quatro pilares avaliados:
+            Justificamos a escolha da <strong>Árvore de Decisão</strong> (com poda) para operar no preditor de redes com base nos quatro pilares avaliados:
           </p>
           <ol>
-            <li><strong>Desempenho e Custo do Erro:</strong> Obteve o maior <strong>Recall ([X%])</strong> e <strong>F1-Score ([X%])</strong>, minimizando os Falsos Negativos (quedas de link que passariam sem alerta preventivo).</li>
-            <li><strong>Latência de Predição:</strong> O tempo de inferência de <strong>[X ms]</strong> atende perfeitamente às janelas de coleta de telemetria quase em tempo real (<em>near real-time</em>).</li>
+            <li><strong>Desempenho e Custo do Erro:</strong> Os três modelos empataram: <strong>Recall (96,15%)</strong> e <strong>F1-Score (98,04%)</strong> idênticos, com apenas 1 Falso Negativo (queda de link sem alerta preventivo) e nenhum Falso Positivo nas 200 amostras de teste. Como o desempenho não distingue os modelos, o desempate vem dos outros pilares.</li>
+            <li><strong>Latência de Predição:</strong> A árvore classificou as 200 amostras de teste em <strong>2,03 ms</strong> (contra 7,31 ms do XGBoost e 39,55 ms da Random Forest) e treinou em 0,0049 s, o que atende às janelas de coleta de telemetria quase em tempo real (<em>near real-time</em>).</li>
             <li><strong>Interpretabilidade:</strong> Como utilizamos atributos diretos de rede (<code>latencia</code>, <code>jitter</code>, <code>perda_pacotes</code> e desvios de baseline), o gráfico de importância de atributos permite ao engenheiro auditar quais métricas dispararam o alerta.</li>
           </ol>
         </div>
