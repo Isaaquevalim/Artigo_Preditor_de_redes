@@ -115,6 +115,9 @@ html {
   .container {
     padding: 0 1.25rem;
   }
+  .section-block {
+  scroll-margin-top: 110px; /* Compensa a altura do menu fixo ao clicar nos links */
+}
 }
 
 /* Hero do Artigo (Mais enxuto) */
@@ -520,4 +523,60 @@ pre code {
     flex-direction: column;
     align-items: flex-start;
   }
+
+  /* =========================================================
+   CORREÇÃO DEFINITIVA DA BARRA INVISÍVEL LATERAL (MOBILE)
+   ========================================================= */
+
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden; /* Impede que qualquer elemento crie espaço lateral */
+}
+
+.site-header,
+main.container,
+.article-wrapper,
+.section-block,
+.model-card,
+.diagram-box,
+.code-container {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0; /* Impede que filhos largos estiquem o contentor pai */
+}
+
+/* Faz URLs longas, nomes de pacotes e inline-code quebrarem de linha no telemóvel */
+p, li, a, code, figcaption, .math-content {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+/* Impede que o cabeçalho do bloco de código empurre a largura da página */
+.code-header {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+pre code {
+  word-wrap: normal;
+  overflow-wrap: normal;
+}
+
+/* Ajusta as 5 fotos dos autores + texto para não estourarem a largura */
+.hero-authors {
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.hero-dates {
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+
 }
