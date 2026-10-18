@@ -33,32 +33,29 @@ html {
 }
 
 /* Cabeçalho Fixo Ultra-Compacto */
+/* Cabeçalho e Menu Otimizados para Celular */
 .site-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(11, 15, 25, 0.92);
+  background: rgba(11, 15, 25, 0.95);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border-color);
-  padding: 0.35rem 0; /* Barra super fina */
-  line-height: 1.2;
+  padding: 0.6rem 0;
 }
 
 .header-content {
-  max-width: 1120px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column; /* No celular, joga a logo em cima e os links embaixo organizados */
   align-items: center;
-  flex-wrap: nowrap;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .brand {
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   font-weight: 800;
   color: var(--text-primary);
   text-decoration: none;
-  white-space: nowrap;
 }
 
 .brand span {
@@ -67,28 +64,57 @@ html {
 
 .nav-links {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  justify-content: center;
   list-style: none;
-  gap: 0.85rem;
-  margin: 0 !important; /* Remove a margem que deixava o header alto */
+  gap: 0.4rem 0.75rem; /* Espaçamento vertical e horizontal equilibrado */
   padding: 0;
-}
-
-.nav-links li {
-  margin: 0 !important; /* Remove a margem inferior dos itens */
+  margin: 0;
 }
 
 .nav-links a {
   color: var(--text-secondary);
   text-decoration: none;
-  font-size: 0.8rem;
+  font-size: 0.8rem; /* Ligeiramente menor para caber perfeito no mobile */
   font-weight: 500;
-  white-space: nowrap;
   transition: color 0.2s;
 }
 
 .nav-links a:hover {
   color: var(--accent-blue);
+}
+
+/* Ajustes gerais de espaçamento para telas pequenas */
+.container {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 0 1rem; /* Margens laterais mais confortáveis no celular */
+}
+
+.article-hero {
+  padding: 2rem 0 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 2rem;
+}
+
+/* Para telas maiores (Tablets e Desktops), o menu volta a ficar lado a lado */
+@media (min-width: 768px) {
+  .header-content {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .nav-links {
+    gap: 1rem;
+  }
+  
+  .nav-links a {
+    font-size: 0.9rem;
+  }
+  
+  .container {
+    padding: 0 1.25rem;
+  }
 }
 
 /* Hero do Artigo (Mais enxuto) */
