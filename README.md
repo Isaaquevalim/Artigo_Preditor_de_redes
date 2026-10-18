@@ -10,7 +10,7 @@ Artigo técnico interativo comparando **Árvore de Decisão**, **Random Forest (
 * **Isaque Rodrigues Valim**
 * **Eduardo Felipe**
 * **Ryan Catão de Paula**
-* **[Nome do Integrante 4]**
+* **Gabriel José Couto Pereira**
 * **[Nome do Integrante 5]**
 
 *(Todos os integrantes registraram consentimento para publicação dos cartões de autoria conforme diretrizes da atividade).*
