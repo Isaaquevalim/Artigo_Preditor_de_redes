@@ -2,14 +2,14 @@
 
 Artigo técnico interativo comparando **Árvore de Decisão**, **Random Forest (Bagging)** e **XGBoost (Boosting)** na tarefa de predição de falhas e congestionamento na rede.
 
-🔗 **Acesse a Página Publicada (Deploy):** [COLE A URL DO GITHUB PAGES / VERCEL AQUI]
+🔗 **Acesse a Página Publicada (Deploy):** (https://artigopreditorderedes.vercel.app/)
 
 ---
 
 ## 👥 Autores
 * **Isaque Rodrigues Valim**
 * **Eduardo Felipe**
-* **[Nome do Integrante 3]**
+* **Ryan Catão de Paula**
 * **[Nome do Integrante 4]**
 * **[Nome do Integrante 5]**
 
