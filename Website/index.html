@@ -422,6 +422,42 @@ xgb.fit(X_train, y_train)</code></pre>
         </figure>
       </section>
 
+      <h3>5.3. Importância dos Atributos (Feature Importance)</h3>
+        <p>
+          Ao inspecionarmos o peso de cada variável de telemetria nas decisões da Random Forest e do XGBoost, descobrimos por que uma única árvore podada conseguiu empatar com os <em>ensembles</em>: a <strong>perda de pacotes (<code>perda_pacotes_pct</code>)</strong> concentra mais de 91% do poder decisório, seguida pelo <strong>jitter (<code>jitter_ms</code>)</strong> e pela <strong>latência média (<code>avg</code>)</strong>.
+        </p>
+
+        <figure class="diagram-box" role="img" aria-label="Gráfico de barras comparando a importância dos atributos na Random Forest e no XGBoost, com amplo domínio da perda de pacotes (acima de 91%).">
+          <svg viewBox="0 0 700 210" class="svg-diagram">
+            <!-- Título interno -->
+            <text x="350" y="22" text-anchor="middle" fill="#f8fafc" font-size="14" font-weight="bold">Peso Relativo das Variáveis na Decisão (Random Forest vs. XGBoost)</text>
+
+            <!-- Eixo de labels -->
+            <text x="155" y="68" text-anchor="end" fill="#cbd5e1" font-size="13" font-weight="bold">perda_pacotes_pct</text>
+            <text x="155" y="125" text-anchor="end" fill="#cbd5e1" font-size="13" font-weight="bold">jitter_ms</text>
+            <text x="155" y="180" text-anchor="end" fill="#cbd5e1" font-size="13" font-weight="bold">avg (latência)</text>
+
+            <!-- Barras perda_pacotes_pct -->
+            <rect x="165" y="45" width="437" height="16" rx="4" fill="#f59e0b"/>
+            <text x="610" y="58" fill="#fef3c7" font-size="12" font-weight="bold">91,06% (RF)</text>
+            <rect x="165" y="65" width="462" height="16" rx="4" fill="#10b981"/>
+            <text x="635" y="78" fill="#ecfdf5" font-size="12" font-weight="bold">96,35% (XGB)</text>
+
+            <!-- Barras jitter_ms -->
+            <rect x="165" y="102" width="26" height="16" rx="4" fill="#f59e0b"/>
+            <text x="198" y="115" fill="#fef3c7" font-size="12">5,29% (RF)</text>
+            <rect x="165" y="122" width="17" height="16" rx="4" fill="#10b981"/>
+            <text x="190" y="135" fill="#ecfdf5" font-size="12">3,46% (XGB)</text>
+
+            <!-- Barras avg -->
+            <rect x="165" y="158" width="18" height="16" rx="4" fill="#f59e0b"/>
+            <text x="190" y="171" fill="#fef3c7" font-size="12">3,65% (RF)</text>
+            <rect x="165" y="178" width="4" height="16" rx="2" fill="#10b981"/>
+            <text x="177" y="191" fill="#ecfdf5" font-size="12">0,19% (XGB)</text>
+          </svg>
+          <figcaption>Figura 4: Importância relativa das variáveis extraída via <code>feature_importances_</code> no conjunto de treino. Elaboração própria (CC BY 4.0).</figcaption>
+        </figure>
+
       <!-- 6. RECOMENDAÇÃO E LIMITAÇÕES -->
       <section id="recomendacao" class="section-block">
         <h2>6. Recomendação para o Preditor de Redes e Limitações</h2>
