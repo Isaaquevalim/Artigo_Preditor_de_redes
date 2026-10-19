@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Artigo técnico comparando Árvore de Decisão, Random Forest e XGBoost aplicados à Previsão de Falha e Congestionamento em Redes.">
+  <meta name="description"
+    content="Artigo técnico comparando Árvore de Decisão, Random Forest e XGBoost aplicados à Previsão de Falha e Congestionamento em Redes.">
   <title>Árvore, Floresta ou Boosting? Previsão de Falha e Congestionamento em Redes</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
   <!-- CABEÇALHO E ÍNDICE NAVEGÁVEL -->
@@ -34,9 +37,12 @@
       <!-- ABERTURA: TÍTULO, SUBTÍTULO, 5 AUTORES E DATAS -->
       <header class="article-hero">
         <span class="badge">Previsão de Falha e Congestionamento em Redes</span>
-        <h1>Árvore, Floresta ou Boosting? Escolhendo o Modelo Ideal para Prever Falhas e Degradação em Enlaces de Rede</h1>
+        <h1>Árvore, Floresta ou Boosting? Escolhendo o Modelo Ideal para Prever Falhas e Degradação em Enlaces de Rede
+        </h1>
         <p class="subtitle">
-          Analisamos métricas reais de telemetria (latência, jitter e perda de pacotes), explicamos o funcionamento interno de Árvore de Decisão, Random Forest e XGBoost e colocamos os três algoritmos à prova para descobrir qual antecipa quedas de rede com maior precisão.
+          Analisamos métricas reais de telemetria (latência, jitter e perda de pacotes), explicamos o funcionamento
+          interno de Árvore de Decisão, Random Forest e XGBoost e colocamos os três algoritmos à prova para descobrir
+          qual antecipa quedas de rede com maior precisão.
         </p>
 
         <div class="hero-meta">
@@ -44,8 +50,8 @@
             <img src="img/Isaque.jpg" alt="Foto de Isaque Rodrigues Valim" class="avatar-sm">
             <img src="img/eduardo.jpg" alt="Foto de Eduardo Felipe" class="avatar-sm">
             <img src="img/ryan.jpg" alt="Foto de Ryan Catão de Paula" class="avatar-sm">
-            <img src="https://ui-avatars.com/api/?name=Membro+4&background=d97706&color=fff" alt="Foto do Integrante 4" class="avatar-sm">
-            <img src="https://ui-avatars.com/api/?name=Membro+5&background=db2777&color=fff" alt="Foto do Integrante 5" class="avatar-sm">
+            <img src="img/gabriel.jpeg" alt="Foto de Gabriel José Couto Pereira" class="avatar-sm">
+            <img src="img/gschmidt.jpg" alt="Foto de Gabriel Schmidt" class="avatar-sm">
             <span>Por <strong>Isaque Valim, Eduardo Felipe e Equipe (5 integrantes)</strong></span>
           </div>
           <div class="hero-dates">
@@ -59,13 +65,24 @@
       <section id="introducao" class="section-block">
         <h2>1. O Problema: Quando um enlace degrada em silêncio antes de cair</h2>
         <p>
-          Na operação de redes modernas, um link raramente fica indisponível do nada. Minutos antes de uma queda crítica ou de um congestionamento severo travar chamadas de vídeo e transações bancárias, o enlace dá sinais sutis: a <strong>latência</strong> (tempo de resposta) começa a subir em relação à linha de base (<em>baseline</em>), o <strong>jitter</strong> (variação do atraso entre pacotes) oscila e pequenas taxas de <strong>perda de pacotes</strong> surgem.
+          Na operação de redes modernas, um link raramente fica indisponível do nada. Minutos antes de uma queda crítica
+          ou de um congestionamento severo travar chamadas de vídeo e transações bancárias, o enlace dá sinais sutis: a
+          <strong>latência</strong> (tempo de resposta) começa a subir em relação à linha de base (<em>baseline</em>), o
+          <strong>jitter</strong> (variação do atraso entre pacotes) oscila e pequenas taxas de <strong>perda de
+            pacotes</strong> surgem.
         </p>
         <p>
-          Se dependermos apenas de limiares fixos manuais (como disparar um alerta somente quando a perda passar de 5%), ou seremos avisados tarde demais quando o serviço já caiu, ou sofreremos com centenas de alarmes falsos causados por picos momentâneos. Nosso objetivo é construir um <strong>preditor de redes</strong> baseado em aprendizado de máquina capaz de cruzar esses indicadores históricos e prever o <code>status</code> do enlace (estável vs. falha/congestionamento).
+          Se dependermos apenas de limiares fixos manuais (como disparar um alerta somente quando a perda passar de 5%),
+          ou seremos avisados tarde demais quando o serviço já caiu, ou sofreremos com centenas de alarmes falsos
+          causados por picos momentâneos. Nosso objetivo é construir um <strong>preditor de redes</strong> baseado em
+          aprendizado de máquina capaz de cruzar esses indicadores históricos e prever o <code>status</code> do enlace
+          (estável vs. falha/congestionamento).
         </p>
         <p>
-          Neste artigo, você vai aprender como funcionam os três principais modelos baseados em árvores — <strong>Árvore de Decisão</strong>, <strong>Random Forest</strong> e <strong>XGBoost</strong> —, entenderá como cada um reduz erros de variância ou viés e verá, por meio de um experimento reproduzível em Python, qual deles escolhemos para o nosso preditor.
+          Neste artigo, você vai aprender como funcionam os três principais modelos baseados em árvores — <strong>Árvore
+            de Decisão</strong>, <strong>Random Forest</strong> e <strong>XGBoost</strong> —, entenderá como cada um
+          reduz erros de variância ou viés e verá, por meio de um experimento reproduzível em Python, qual deles
+          escolhemos para o nosso preditor.
         </p>
       </section>
 
@@ -73,18 +90,21 @@
       <section id="exemplo-concreto" class="section-block">
         <h2>2. Exemplo Concreto: Uma árvore pequena monitorando o enlace</h2>
         <p>
-          Antes de entrarmos nas equações e conjuntos de árvores, vamos visualizar como uma única árvore toma decisões olhando para as métricas da nossa rede. Ela funciona como uma sequência de perguntas objetivas sobre o estado atual do link:
+          Antes de entrarmos nas equações e conjuntos de árvores, vamos visualizar como uma única árvore toma decisões
+          olhando para as métricas da nossa rede. Ela funciona como uma sequência de perguntas objetivas sobre o estado
+          atual do link:
         </p>
 
-        <figure class="diagram-box" role="img" aria-label="Diagrama de uma árvore de decisão rasa avaliando perda de pacotes, latência e jitter para prever se o enlace está normal ou em falha/congestionamento.">
+        <figure class="diagram-box" role="img"
+          aria-label="Diagrama de uma árvore de decisão rasa avaliando perda de pacotes, latência e jitter para prever se o enlace está normal ou em falha/congestionamento.">
           <svg viewBox="0 0 700 280" class="svg-diagram">
             <!-- Linhas conectoras -->
-            <line x1="350" y1="55" x2="180" y2="120" stroke="#64748b" stroke-width="2"/>
-            <line x1="350" y1="55" x2="520" y2="120" stroke="#64748b" stroke-width="2"/>
-            <line x1="180" y1="160" x2="100" y2="225" stroke="#64748b" stroke-width="2"/>
-            <line x1="180" y1="160" x2="260" y2="225" stroke="#64748b" stroke-width="2"/>
-            <line x1="520" y1="160" x2="440" y2="225" stroke="#64748b" stroke-width="2"/>
-            <line x1="520" y1="160" x2="600" y2="225" stroke="#64748b" stroke-width="2"/>
+            <line x1="350" y1="55" x2="180" y2="120" stroke="#64748b" stroke-width="2" />
+            <line x1="350" y1="55" x2="520" y2="120" stroke="#64748b" stroke-width="2" />
+            <line x1="180" y1="160" x2="100" y2="225" stroke="#64748b" stroke-width="2" />
+            <line x1="180" y1="160" x2="260" y2="225" stroke="#64748b" stroke-width="2" />
+            <line x1="520" y1="160" x2="440" y2="225" stroke="#64748b" stroke-width="2" />
+            <line x1="520" y1="160" x2="600" y2="225" stroke="#64748b" stroke-width="2" />
 
             <!-- Labels Sim/Não -->
             <text x="245" y="85" fill="#94a3b8" font-size="13">Não</text>
@@ -95,34 +115,43 @@
             <text x="570" y="195" fill="#94a3b8" font-size="12">Sim</text>
 
             <!-- Nó Raiz -->
-            <rect x="250" y="15" width="200" height="40" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
-            <text x="350" y="40" text-anchor="middle" fill="#f8fafc" font-size="14" font-weight="bold">perda_pacotes &gt; 1.5%?</text>
+            <rect x="250" y="15" width="200" height="40" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+            <text x="350" y="40" text-anchor="middle" fill="#f8fafc" font-size="14" font-weight="bold">perda_pacotes
+              &gt; 1.5%?</text>
 
             <!-- Nós Intermediários -->
-            <rect x="95" y="120" width="170" height="40" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+            <rect x="95" y="120" width="170" height="40" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
             <text x="180" y="145" text-anchor="middle" fill="#f8fafc" font-size="14">latencia &gt; 120 ms?</text>
 
-            <rect x="435" y="120" width="170" height="40" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+            <rect x="435" y="120" width="170" height="40" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
             <text x="520" y="145" text-anchor="middle" fill="#f8fafc" font-size="14">jitter &gt; 30 ms?</text>
 
             <!-- Folhas -->
-            <rect x="40" y="225" width="120" height="36" rx="6" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
-            <text x="100" y="248" text-anchor="middle" fill="#ecfdf5" font-size="13" font-weight="bold">Status: Normal</text>
+            <rect x="40" y="225" width="120" height="36" rx="6" fill="#064e3b" stroke="#10b981" stroke-width="2" />
+            <text x="100" y="248" text-anchor="middle" fill="#ecfdf5" font-size="13" font-weight="bold">Status:
+              Normal</text>
 
-            <rect x="200" y="225" width="125" height="36" rx="6" fill="#7f1d1d" stroke="#ef4444" stroke-width="2"/>
-            <text x="262" y="248" text-anchor="middle" fill="#fef2f2" font-size="13" font-weight="bold">Congestionado</text>
+            <rect x="200" y="225" width="125" height="36" rx="6" fill="#7f1d1d" stroke="#ef4444" stroke-width="2" />
+            <text x="262" y="248" text-anchor="middle" fill="#fef2f2" font-size="13"
+              font-weight="bold">Congestionado</text>
 
-            <rect x="380" y="225" width="120" height="36" rx="6" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
-            <text x="440" y="248" text-anchor="middle" fill="#ecfdf5" font-size="13" font-weight="bold">Status: Normal</text>
+            <rect x="380" y="225" width="120" height="36" rx="6" fill="#064e3b" stroke="#10b981" stroke-width="2" />
+            <text x="440" y="248" text-anchor="middle" fill="#ecfdf5" font-size="13" font-weight="bold">Status:
+              Normal</text>
 
-            <rect x="540" y="225" width="125" height="36" rx="6" fill="#7f1d1d" stroke="#ef4444" stroke-width="2"/>
-            <text x="602" y="248" text-anchor="middle" fill="#fef2f2" font-size="13" font-weight="bold">Falha no Enlace</text>
+            <rect x="540" y="225" width="125" height="36" rx="6" fill="#7f1d1d" stroke="#ef4444" stroke-width="2" />
+            <text x="602" y="248" text-anchor="middle" fill="#fef2f2" font-size="13" font-weight="bold">Falha no
+              Enlace</text>
           </svg>
-          <figcaption>Figura 1: Exemplo de árvore de decisão rasa (profundidade 2) avaliando perda de pacotes, latência e jitter para diagnosticar a saúde da rede. Elaboração própria (CC BY 4.0).</figcaption>
+          <figcaption>Figura 1: Exemplo de árvore de decisão rasa (profundidade 2) avaliando perda de pacotes, latência
+            e jitter para diagnosticar a saúde da rede. Elaboração própria (CC BY 4.0).</figcaption>
         </figure>
 
         <p>
-          O bloco no topo (<code>perda_pacotes &gt; 1.5%?</code>) é o <strong>nó raiz</strong>; as perguntas seguintes são os <strong>nós internos</strong>; e os resultados finais (verdes ou vermelhos) são as <strong>folhas</strong>. Basta seguir as setas de cima para baixo para entender exatamente por que o modelo declarou falha.
+          O bloco no topo (<code>perda_pacotes &gt; 1.5%?</code>) é o <strong>nó raiz</strong>; as perguntas seguintes
+          são os <strong>nós internos</strong>; e os resultados finais (verdes ou vermelhos) são as
+          <strong>folhas</strong>. Basta seguir as setas de cima para baixo para entender exatamente por que o modelo
+          declarou falha.
         </p>
       </section>
 
@@ -130,20 +159,33 @@
       <section id="modelos" class="section-block">
         <h2>3. Os Três Modelos: Da Árvore Simples ao Boosting</h2>
         <p>
-          Embora usem a mesma estrutura de nós e folhas, Árvore de Decisão, Random Forest e XGBoost diferem radicalmente na forma como aprendem e corrigem seus erros.
+          Embora usem a mesma estrutura de nós e folhas, Árvore de Decisão, Random Forest e XGBoost diferem radicalmente
+          na forma como aprendem e corrigem seus erros.
         </p>
 
         <!-- 3.1 ÁRVORE DE DECISÃO -->
         <div class="model-card">
           <h3>3.1. Árvore de Decisão (Decision Tree)</h3>
           <p>
-            <strong>O que é e como funciona:</strong> Um modelo que aprende regras de corte nos atributos para separar as classes com a menor mistura possível. Em cada nó, ele testa limiares (ex.: qual valor de <code>latencia</code> melhor separa rede saudável de rede degradada?) usando métricas de pureza como o índice <strong>Gini</strong> ou a <strong>Entropia</strong>.
+            <strong>O que é e como funciona:</strong> Um modelo que aprende regras de corte nos atributos para separar
+            as classes com a menor mistura possível. Em cada nó, ele testa limiares (ex.: qual valor de
+            <code>latencia</code> melhor separa rede saudável de rede degradada?) usando métricas de pureza como o
+            índice <strong>Gini</strong> ou a <strong>Entropia</strong>.
           </p>
           <p>
-            <strong>Sensibilidade e Overfitting:</strong> Se não limitarmos a <strong>profundidade</strong> máxima da árvore, ela continuará criando ramificações até isolar cada linha do histórico de treino — memorizando ruídos passageiros da rede. Isso é o <strong>overfitting</strong> (sobreajuste): excelente nota no treino, mas alto erro em produção. Como uma pequena alteração nos dados de treino pode mudar o nó raiz e gerar uma árvore totalmente diferente, dizemos que ela tem <strong>alta variância</strong>. Controlamos esse problema aplicando <strong>poda</strong> (limitando hiperparâmetros como <code>max_depth</code> e <code>min_samples_leaf</code>, onde <em>hiperparâmetro</em> é toda configuração ajustada antes de treinar o modelo).
+            <strong>Sensibilidade e Overfitting:</strong> Se não limitarmos a <strong>profundidade</strong> máxima da
+            árvore, ela continuará criando ramificações até isolar cada linha do histórico de treino — memorizando
+            ruídos passageiros da rede. Isso é o <strong>overfitting</strong> (sobreajuste): excelente nota no treino,
+            mas alto erro em produção. Como uma pequena alteração nos dados de treino pode mudar o nó raiz e gerar uma
+            árvore totalmente diferente, dizemos que ela tem <strong>alta variância</strong>. Controlamos esse problema
+            aplicando <strong>poda</strong> (limitando hiperparâmetros como <code>max_depth</code> e
+            <code>min_samples_leaf</code>, onde <em>hiperparâmetro</em> é toda configuração ajustada antes de treinar o
+            modelo).
           </p>
           <p>
-            <strong>Quando é mais apropriada:</strong> Quando precisamos de <strong>interpretabilidade visual direta</strong> (qualquer engenheiro de redes consegue ler as regras) e tempo de inferência na casa de microssegundos.
+            <strong>Quando é mais apropriada:</strong> Quando precisamos de <strong>interpretabilidade visual
+              direta</strong> (qualquer engenheiro de redes consegue ler as regras) e tempo de inferência na casa de
+            microssegundos.
           </p>
 
           <details class="math-box">
@@ -151,7 +193,8 @@
             <div class="math-content">
               <p>Sendo $p_i$ a fração de amostras pertencentes à classe $i$ dentro de um nó:</p>
               <ul>
-                <li><strong>Índice Gini:</strong> $Gini = 1 - \sum_{i=1}^{C} (p_i)^2$. Quanto mais próximo de $0$, mais puro está o nó.</li>
+                <li><strong>Índice Gini:</strong> $Gini = 1 - \sum_{i=1}^{C} (p_i)^2$. Quanto mais próximo de $0$, mais
+                  puro está o nó.</li>
                 <li><strong>Entropia:</strong> $H = -\sum_{i=1}^{C} p_i \log_2(p_i)$. Mede a incerteza da divisão.</li>
               </ul>
             </div>
@@ -162,13 +205,23 @@
         <div class="model-card">
           <h3>3.2. Random Forest (Bagging)</h3>
           <p>
-            <strong>O que é e como funciona:</strong> Uma coleção de muitas árvores treinadas <strong>em paralelo</strong> de forma independente, onde a previsão final é decidida pela <strong>votação da maioria</strong>. Ela aplica a técnica de <strong>bagging</strong> (<em>Bootstrap Aggregating</em>): cada árvore é treinada em uma <strong>amostra bootstrap</strong> (um sorteio aleatório dos dados com reposição) e avalia apenas um subconjunto sorteado de colunas em cada divisão.
+            <strong>O que é e como funciona:</strong> Uma coleção de muitas árvores treinadas <strong>em
+              paralelo</strong> de forma independente, onde a previsão final é decidida pela <strong>votação da
+              maioria</strong>. Ela aplica a técnica de <strong>bagging</strong> (<em>Bootstrap Aggregating</em>): cada
+            árvore é treinada em uma <strong>amostra bootstrap</strong> (um sorteio aleatório dos dados com reposição) e
+            avalia apenas um subconjunto sorteado de colunas em cada divisão.
           </p>
           <p>
-            <strong>Por que reduz a variância?</strong> Uma árvore sozinha pode se enganar por causa de um pico atípico de <code>jitter</code> no treino. Porém, quando cem árvores diferentes (treinadas com sorteios distintos) votam juntas, os erros individuais se anulam e a decisão coletiva se torna muito mais estável. Além disso, os exemplos que ficam de fora do sorteio de cada árvore permitem medir o <strong>erro out-of-bag (OOB)</strong> e extrair a <strong>importância dos atributos</strong> para saber qual métrica da rede mais pesa no diagnóstico.
+            <strong>Por que reduz a variância?</strong> Uma árvore sozinha pode se enganar por causa de um pico atípico
+            de <code>jitter</code> no treino. Porém, quando cem árvores diferentes (treinadas com sorteios distintos)
+            votam juntas, os erros individuais se anulam e a decisão coletiva se torna muito mais estável. Além disso,
+            os exemplos que ficam de fora do sorteio de cada árvore permitem medir o <strong>erro out-of-bag
+              (OOB)</strong> e extrair a <strong>importância dos atributos</strong> para saber qual métrica da rede mais
+            pesa no diagnóstico.
           </p>
           <p>
-            <strong>Quando é mais apropriada:</strong> Cenários com dados ruidosos de telemetria onde queremos estabilidade imediata e baixíssimo risco de overfitting sem precisar de ajustes delicados.
+            <strong>Quando é mais apropriada:</strong> Cenários com dados ruidosos de telemetria onde queremos
+            estabilidade imediata e baixíssimo risco de overfitting sem precisar de ajustes delicados.
           </p>
         </div>
 
@@ -176,74 +229,95 @@
         <div class="model-card">
           <h3>3.3. XGBoost (Extreme Gradient Boosting)</h3>
           <p>
-            <strong>O que é e como funciona:</strong> Em vez de treinar árvores independentes em paralelo, o <strong>boosting</strong> constrói árvores curtas <strong>em sequência</strong>. A árvore 1 faz uma previsão inicial; a árvore 2 analisa onde a árvore 1 errou e é treinada especificamente para corrigir esses resíduos; a árvore 3 corrige os erros das duas primeiras, somando suas contribuições.
+            <strong>O que é e como funciona:</strong> Em vez de treinar árvores independentes em paralelo, o
+            <strong>boosting</strong> constrói árvores curtas <strong>em sequência</strong>. A árvore 1 faz uma previsão
+            inicial; a árvore 2 analisa onde a árvore 1 errou e é treinada especificamente para corrigir esses resíduos;
+            a árvore 3 corrige os erros das duas primeiras, somando suas contribuições.
           </p>
           <p>
-            <strong>Por que reduz o viés?</strong> <em>Viés</em> é a incapacidade de um modelo simples capturar padrões sutis (como uma combinação complexa entre aumento leve de <code>jitter</code> em relação ao baseline e microperdas de pacotes). Ao usar o gradiente da função de erro (<strong>gradient boosting</strong>) para focar nas amostras que o modelo anterior errou, o XGBoost reduz sistematicamente o viés. Para não sofrer overfitting nessa busca, ele inclui <strong>regularização</strong> matemática ($L_1$ e $L_2$), modula o peso de cada árvore pela <strong>taxa de aprendizado</strong> (<code>learning_rate</code>), interrompe o treino com <strong>parada antecipada (early stopping)</strong> se o erro de validação parar de cair e compensa o <strong>desbalanceamento de classes</strong>.
+            <strong>Por que reduz o viés?</strong> <em>Viés</em> é a incapacidade de um modelo simples capturar padrões
+            sutis (como uma combinação complexa entre aumento leve de <code>jitter</code> em relação ao baseline e
+            microperdas de pacotes). Ao usar o gradiente da função de erro (<strong>gradient boosting</strong>) para
+            focar nas amostras que o modelo anterior errou, o XGBoost reduz sistematicamente o viés. Para não sofrer
+            overfitting nessa busca, ele inclui <strong>regularização</strong> matemática ($L_1$ e $L_2$), modula o peso
+            de cada árvore pela <strong>taxa de aprendizado</strong> (<code>learning_rate</code>), interrompe o treino
+            com <strong>parada antecipada (early stopping)</strong> se o erro de validação parar de cair e compensa o
+            <strong>desbalanceamento de classes</strong>.
           </p>
           <p>
-            <strong>Quando é mais apropriado:</strong> Quando buscamos a máxima sensibilidade na detecção de falhas iminentes em bases tabulares e dispomos de rotina de validação para calibrar seus hiperparâmetros.
+            <strong>Quando é mais apropriado:</strong> Quando buscamos a máxima sensibilidade na detecção de falhas
+            iminentes em bases tabulares e dispomos de rotina de validação para calibrar seus hiperparâmetros.
           </p>
 
           <details class="math-box">
             <summary>📐 Caixa de Aprofundamento: Função Objetivo Regularizada do XGBoost</summary>
             <div class="math-content">
-              <p>A cada passo $t$, o algoritmo adiciona uma árvore $f_t$ que minimiza o erro somado a uma penalidade de complexidade $\Omega$:</p>
-              <p>$$\mathcal{L}^{(t)} = \sum_{i=1}^{n} l\left(y_i, \hat{y}_i^{(t-1)} + f_t(x_i)\right) + \Omega(f_t), \quad \text{onde } \Omega(f) = \gamma T + \frac{1}{2}\lambda \sum_{j=1}^{T} w_j^2$$</p>
-              <p>Aqui, $T$ é o número de folhas e $w_j$ a pontuação de cada folha, evitando árvores excessivamente complexas.</p>
+              <p>A cada passo $t$, o algoritmo adiciona uma árvore $f_t$ que minimiza o erro somado a uma penalidade de
+                complexidade $\Omega$:</p>
+              <p>$$\mathcal{L}^{(t)} = \sum_{i=1}^{n} l\left(y_i, \hat{y}_i^{(t-1)} + f_t(x_i)\right) + \Omega(f_t),
+                \quad \text{onde } \Omega(f) = \gamma T + \frac{1}{2}\lambda \sum_{j=1}^{T} w_j^2$$</p>
+              <p>Aqui, $T$ é o número de folhas e $w_j$ a pontuação de cada folha, evitando árvores excessivamente
+                complexas.</p>
             </div>
           </details>
         </div>
 
         <!-- ESQUEMA VISUAL: BAGGING VS BOOSTING -->
-        <figure class="diagram-box" role="img" aria-label="Esquema visual comparando a Random Forest com árvores paralelas e votação por maioria contra o XGBoost com árvores em sequência corrigindo erros e somando resultados.">
+        <figure class="diagram-box" role="img"
+          aria-label="Esquema visual comparando a Random Forest com árvores paralelas e votação por maioria contra o XGBoost com árvores em sequência corrigindo erros e somando resultados.">
           <svg viewBox="0 0 760 230" class="svg-diagram">
             <!-- BAGGING -->
-            <text x="180" y="25" text-anchor="middle" fill="#38bdf8" font-size="15" font-weight="bold">Random Forest (Bagging — Paralelo)</text>
-            <rect x="30" y="45" width="90" height="40" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+            <text x="180" y="25" text-anchor="middle" fill="#38bdf8" font-size="15" font-weight="bold">Random Forest
+              (Bagging — Paralelo)</text>
+            <rect x="30" y="45" width="90" height="40" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="2" />
             <text x="75" y="70" text-anchor="middle" fill="#f8fafc" font-size="13">Árvore 1</text>
-            <rect x="30" y="100" width="90" height="40" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+            <rect x="30" y="100" width="90" height="40" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="2" />
             <text x="75" y="125" text-anchor="middle" fill="#f8fafc" font-size="13">Árvore 2</text>
-            <rect x="30" y="155" width="90" height="40" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+            <rect x="30" y="155" width="90" height="40" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="2" />
             <text x="75" y="180" text-anchor="middle" fill="#f8fafc" font-size="13">Árvore 3</text>
 
-            <line x1="120" y1="65" x2="210" y2="115" stroke="#f59e0b" stroke-width="2"/>
-            <line x1="120" y1="120" x2="210" y2="120" stroke="#f59e0b" stroke-width="2"/>
-            <line x1="120" y1="175" x2="210" y2="125" stroke="#f59e0b" stroke-width="2"/>
+            <line x1="120" y1="65" x2="210" y2="115" stroke="#f59e0b" stroke-width="2" />
+            <line x1="120" y1="120" x2="210" y2="120" stroke="#f59e0b" stroke-width="2" />
+            <line x1="120" y1="175" x2="210" y2="125" stroke="#f59e0b" stroke-width="2" />
 
-            <rect x="210" y="90" width="130" height="60" rx="8" fill="#451a03" stroke="#f59e0b" stroke-width="2"/>
-            <text x="275" y="116" text-anchor="middle" fill="#fef3c7" font-size="13" font-weight="bold">Votação por</text>
-            <text x="275" y="134" text-anchor="middle" fill="#fef3c7" font-size="13" font-weight="bold">Maioria (↓ Variância)</text>
+            <rect x="210" y="90" width="130" height="60" rx="8" fill="#451a03" stroke="#f59e0b" stroke-width="2" />
+            <text x="275" y="116" text-anchor="middle" fill="#fef3c7" font-size="13" font-weight="bold">Votação
+              por</text>
+            <text x="275" y="134" text-anchor="middle" fill="#fef3c7" font-size="13" font-weight="bold">Maioria (↓
+              Variância)</text>
 
             <!-- Divisor -->
-            <line x1="375" y1="15" x2="375" y2="210" stroke="#334155" stroke-dasharray="6,6" stroke-width="2"/>
+            <line x1="375" y1="15" x2="375" y2="210" stroke="#334155" stroke-dasharray="6,6" stroke-width="2" />
 
             <!-- BOOSTING -->
-            <text x="570" y="25" text-anchor="middle" fill="#10b981" font-size="15" font-weight="bold">XGBoost (Boosting — Sequencial)</text>
-            <rect x="400" y="95" width="75" height="50" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+            <text x="570" y="25" text-anchor="middle" fill="#10b981" font-size="15" font-weight="bold">XGBoost (Boosting
+              — Sequencial)</text>
+            <rect x="400" y="95" width="75" height="50" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="2" />
             <text x="437" y="125" text-anchor="middle" fill="#f8fafc" font-size="13">Árv. 1</text>
 
-            <line x1="475" y1="120" x2="515" y2="120" stroke="#10b981" stroke-width="2"/>
+            <line x1="475" y1="120" x2="515" y2="120" stroke="#10b981" stroke-width="2" />
             <text x="495" y="82" text-anchor="middle" fill="#6ee7b7" font-size="11">corrige erro</text>
 
-            <rect x="515" y="95" width="75" height="50" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+            <rect x="515" y="95" width="75" height="50" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="2" />
             <text x="552" y="125" text-anchor="middle" fill="#f8fafc" font-size="13">Árv. 2</text>
 
-            <line x1="590" y1="120" x2="630" y2="120" stroke="#10b981" stroke-width="2"/>
+            <line x1="590" y1="120" x2="630" y2="120" stroke="#10b981" stroke-width="2" />
             <text x="610" y="82" text-anchor="middle" fill="#6ee7b7" font-size="11">corrige erro</text>
 
-            <circle cx="685" cy="120" r="45" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
+            <circle cx="685" cy="120" r="45" fill="#064e3b" stroke="#10b981" stroke-width="2" />
             <text x="685" y="116" text-anchor="middle" fill="#ecfdf5" font-size="12" font-weight="bold">Soma</text>
             <text x="685" y="133" text-anchor="middle" fill="#ecfdf5" font-size="11">(↓ Viés)</text>
           </svg>
-          <figcaption>Figura 2: Comparação entre o paralelismo da Random Forest (votação por maioria) e a cadeia sequencial corretiva do XGBoost. Elaboração própria (CC BY 4.0).</figcaption>
+          <figcaption>Figura 2: Comparação entre o paralelismo da Random Forest (votação por maioria) e a cadeia
+            sequencial corretiva do XGBoost. Elaboração própria (CC BY 4.0).</figcaption>
         </figure>
 
         <!-- TRECHO DE CÓDIGO PYTHON COMENTADO -->
         <div class="code-container">
           <div class="code-header">
             <span>🐍 Python 3.11 | scikit-learn==1.5.2 | xgboost==2.1.1</span>
-            <a href="https://github.com/Yuoneeh/Artigo_Preditor_de_redes/tree/main/Notebooks_Testes" target="_blank" rel="noopener">Ver Notebook em Notebooks_Testes ↗</a>
+            <a href="https://github.com/Yuoneeh/Artigo_Preditor_de_redes/tree/main/Notebooks_Testes" target="_blank"
+              rel="noopener">Ver Notebook em Notebooks_Testes ↗</a>
           </div>
           <pre><code class="language-python"># Seleção das features do preditor de redes e treino comparativo com semente fixa
 from sklearn.tree import DecisionTreeClassifier
@@ -337,11 +411,18 @@ xgb.fit(X_train, y_train)</code></pre>
       <section id="experimento" class="section-block">
         <h2>5. O Experimento no Preditor de Redes</h2>
         <p>
-          Treinamos e avaliamos os três modelos exatamente na mesma base de telemetria de rede (contendo <code>timestamp</code>, <code>jitter</code>, <code>latencia</code>, <code>perda_pacotes</code>, <code>status</code> e variáveis de baseline). Utilizamos divisão estratificada de <strong>80% para treino e 20% para teste</strong> com <code>random_state=42</code>, realizando o ajuste de hiperparâmetros de forma justa exclusivamente sobre os dados de treino.
+          Treinamos e avaliamos os três modelos exatamente na mesma base de telemetria de rede (contendo
+          <code>timestamp</code>, <code>jitter</code>, <code>latencia</code>, <code>perda_pacotes</code>,
+          <code>status</code> e variáveis de baseline). Utilizamos divisão estratificada de <strong>80% para treino e
+            20% para teste</strong> com <code>random_state=42</code>, realizando o ajuste de hiperparâmetros de forma
+          justa exclusivamente sobre os dados de treino.
         </p>
 
         <div class="callout-warning">
-          <strong>⚠️ Por que Acurácia não basta na previsão de falhas?</strong> Na maior parte do tempo, o enlace opera normalmente. Se 95% das medições forem normais e 5% forem quedas, um modelo que preveja "normal" sempre terá 95% de acurácia, mas falhará em 100% dos incidentes reais. Por isso medimos <strong>Precisão</strong>, <strong>Recall</strong> e <strong>F1-Score</strong>.
+          <strong>⚠️ Por que Acurácia não basta na previsão de falhas?</strong> Na maior parte do tempo, o enlace opera
+          normalmente. Se 95% das medições forem normais e 5% forem quedas, um modelo que preveja "normal" sempre terá
+          95% de acurácia, mas falhará em 100% dos incidentes reais. Por isso medimos <strong>Precisão</strong>,
+          <strong>Recall</strong> e <strong>F1-Score</strong>.
         </div>
 
         <h3>5.1. Tabela de Resultados Experimentais</h3>
@@ -388,14 +469,19 @@ xgb.fit(X_train, y_train)</code></pre>
 
         <h3>5.2. Matriz de Confusão e o Custo Operacional do Erro</h3>
         <p>
-          Na previsão de falhas e congestionamento, os dois tipos de erro têm impactos muito diferentes para a equipe de infraestrutura:
+          Na previsão de falhas e congestionamento, os dois tipos de erro têm impactos muito diferentes para a equipe de
+          infraestrutura:
         </p>
         <ul>
-          <li><strong>Custo do Falso Negativo (FN — Falha não prevista):</strong> É o erro mais grave. O enlace está prestes a cair ou congestionar, mas o modelo diz que está "normal". Nenhuma rota de backup é ativada e os usuários sofrem queda de serviço.</li>
-          <li><strong>Custo do Falso Positivo (FP — Alarme falso):</strong> O modelo aponta risco de falha em uma oscilação inofensiva. Gera verificação preventiva ou reroteamento cautelar, mas não derruba a operação.</li>
+          <li><strong>Custo do Falso Negativo (FN — Falha não prevista):</strong> É o erro mais grave. O enlace está
+            prestes a cair ou congestionar, mas o modelo diz que está "normal". Nenhuma rota de backup é ativada e os
+            usuários sofrem queda de serviço.</li>
+          <li><strong>Custo do Falso Positivo (FP — Alarme falso):</strong> O modelo aponta risco de falha em uma
+            oscilação inofensiva. Gera verificação preventiva ou reroteamento cautelar, mas não derruba a operação.</li>
         </ul>
 
-        <figure class="diagram-box" role="img" aria-label="Matriz de Confusão (idêntica nos três modelos) detalhando Verdadeiros Negativos, Falsos Positivos, Falsos Negativos e Verdadeiros Positivos na previsão de falhas.">
+        <figure class="diagram-box" role="img"
+          aria-label="Matriz de Confusão (idêntica nos três modelos) detalhando Verdadeiros Negativos, Falsos Positivos, Falsos Negativos e Verdadeiros Positivos na previsão de falhas.">
           <div class="confusion-grid">
             <div class="cm-cell cm-tn">
               <span class="cm-title">Verdadeiro Negativo (VN)</span>
@@ -418,7 +504,8 @@ xgb.fit(X_train, y_train)</code></pre>
               <small>Falha/Congestionamento previsto a tempo</small>
             </div>
           </div>
-          <figcaption>Figura 3: Matriz de confusão no conjunto de teste (200 amostras, 26 falhas reais). Os três modelos produziram exatamente a mesma matriz. Elaboração própria.</figcaption>
+          <figcaption>Figura 3: Matriz de confusão no conjunto de teste (200 amostras, 26 falhas reais). Os três modelos
+            produziram exatamente a mesma matriz. Elaboração própria.</figcaption>
         </figure>
       </section>
 
@@ -464,19 +551,30 @@ xgb.fit(X_train, y_train)</code></pre>
         <div class="recommendation-box">
           <h3>🏆 Escolha do Grupo: Árvore de Decisão</h3>
           <p>
-            Justificamos a escolha da <strong>Árvore de Decisão</strong> (com poda) para operar no preditor de redes com base nos quatro pilares avaliados:
+            Justificamos a escolha da <strong>Árvore de Decisão</strong> (com poda) para operar no preditor de redes com
+            base nos quatro pilares avaliados:
           </p>
           <ol>
-            <li><strong>Desempenho e Custo do Erro:</strong> Os três modelos empataram: <strong>Recall (96,15%)</strong> e <strong>F1-Score (98,04%)</strong> idênticos, com apenas 1 Falso Negativo (queda de link sem alerta preventivo) e nenhum Falso Positivo nas 200 amostras de teste. Como o desempenho não distingue os modelos, o desempate vem dos outros pilares.</li>
-            <li><strong>Latência de Predição:</strong> A árvore classificou as 200 amostras de teste em <strong>2,03 ms</strong> (contra 7,31 ms do XGBoost e 39,55 ms da Random Forest) e treinou em 0,0049 s, o que atende às janelas de coleta de telemetria quase em tempo real (<em>near real-time</em>).</li>
-            <li><strong>Interpretabilidade:</strong> Como utilizamos atributos diretos de rede (<code>latencia</code>, <code>jitter</code>, <code>perda_pacotes</code> e desvios de baseline), o gráfico de importância de atributos permite ao engenheiro auditar quais métricas dispararam o alerta.</li>
+            <li><strong>Desempenho e Custo do Erro:</strong> Os três modelos empataram: <strong>Recall (96,15%)</strong>
+              e <strong>F1-Score (98,04%)</strong> idênticos, com apenas 1 Falso Negativo (queda de link sem alerta
+              preventivo) e nenhum Falso Positivo nas 200 amostras de teste. Como o desempenho não distingue os modelos,
+              o desempate vem dos outros pilares.</li>
+            <li><strong>Latência de Predição:</strong> A árvore classificou as 200 amostras de teste em <strong>2,03
+                ms</strong> (contra 7,31 ms do XGBoost e 39,55 ms da Random Forest) e treinou em 0,0049 s, o que atende
+              às janelas de coleta de telemetria quase em tempo real (<em>near real-time</em>).</li>
+            <li><strong>Interpretabilidade:</strong> Como utilizamos atributos diretos de rede (<code>latencia</code>,
+              <code>jitter</code>, <code>perda_pacotes</code> e desvios de baseline), o gráfico de importância de
+              atributos permite ao engenheiro auditar quais métricas dispararam o alerta.</li>
           </ol>
         </div>
 
         <h3>Limitações do Método</h3>
         <ul>
-          <li><strong>Rompimento Físico Abrupto (Ex.: Fibra Rompida):</strong> Nenhum modelo preditivo baseado em degradação gradual de latência ou jitter consegue prever um corte físico instantâneo de cabo sem sinais prévios no tráfego.</li>
-          <li><strong>Mudança de Topologia (Data Drift):</strong> Se a infraestrutura da rede mudar (ex.: troca de rota física que altere o patamar normal de latência), o baseline e o modelo precisarão ser recalibrados.</li>
+          <li><strong>Rompimento Físico Abrupto (Ex.: Fibra Rompida):</strong> Nenhum modelo preditivo baseado em
+            degradação gradual de latência ou jitter consegue prever um corte físico instantâneo de cabo sem sinais
+            prévios no tráfego.</li>
+          <li><strong>Mudança de Topologia (Data Drift):</strong> Se a infraestrutura da rede mudar (ex.: troca de rota
+            física que altere o patamar normal de latência), o baseline e o modelo precisarão ser recalibrados.</li>
         </ul>
       </section>
 
@@ -487,24 +585,31 @@ xgb.fit(X_train, y_train)</code></pre>
           <div class="obs-card">
             <h4>🔍 2 Referências Observadas</h4>
             <ul>
-              <li><strong>ActiveState (RF vs. XGBoost):</strong> Estrutura didática excelente que parte da árvore simples até chegar ao boosting com código enxuto.</li>
-              <li><strong>Vitalflux (Regras de Bolso):</strong> Clareza ao contrastar quando usar cada modelo em tabelas rápidas.</li>
+              <li><strong>ActiveState (RF vs. XGBoost):</strong> Estrutura didática excelente que parte da árvore
+                simples até chegar ao boosting com código enxuto.</li>
+              <li><strong>Vitalflux (Regras de Bolso):</strong> Clareza ao contrastar quando usar cada modelo em tabelas
+                rápidas.</li>
             </ul>
           </div>
 
           <div class="obs-card">
             <h4>✅ 3 Decisões do Grupo</h4>
             <ul>
-              <li><strong>1. Adotamos diagramas vetoriais (SVG)</strong> para garantir nitidez máxima tanto no projetor da sala quanto no celular.</li>
-              <li><strong>2. Adotamos caixas expansíveis para a matemática</strong> para manter o texto fluido sem perder rigor técnico.</li>
-              <li><strong>3. Priorizamos o Recall e o F1-Score</strong> porque prever quedas reais importa mais do que acertar apenas momentos de rede ociosa.</li>
+              <li><strong>1. Adotamos diagramas vetoriais (SVG)</strong> para garantir nitidez máxima tanto no projetor
+                da sala quanto no celular.</li>
+              <li><strong>2. Adotamos caixas expansíveis para a matemática</strong> para manter o texto fluido sem
+                perder rigor técnico.</li>
+              <li><strong>3. Priorizamos o Recall e o F1-Score</strong> porque prever quedas reais importa mais do que
+                acertar apenas momentos de rede ociosa.</li>
             </ul>
           </div>
 
           <div class="obs-card obs-dont">
             <h4>🚫 1 Decisão que NÃO Tomamos</h4>
             <p>
-              <strong>Decidimos não incluir dezenas de colunas irrelevantes nem avaliar os modelos apenas pela acurácia global</strong>, mantendo estritamente as métricas essenciais de telemetria (jitter, latência, perda de pacotes e baseline) para evitar overfitting e garantir interpretabilidade.
+              <strong>Decidimos não incluir dezenas de colunas irrelevantes nem avaliar os modelos apenas pela acurácia
+                global</strong>, mantendo estritamente as métricas essenciais de telemetria (jitter, latência, perda de
+              pacotes e baseline) para evitar overfitting e garantir interpretabilidade.
             </p>
           </div>
         </div>
@@ -516,24 +621,35 @@ xgb.fit(X_train, y_train)</code></pre>
         <h3>🔗 Links Comentados (Para ir além)</h3>
         <ul class="commented-links">
           <li>
-            <a href="https://xgboost.readthedocs.io/en/stable/tutorials/model.html" target="_blank" rel="noopener">Documentação Oficial do XGBoost</a> — Guia fundamental para compreender como árvores de regressão somadas e regularizadas evitam overfitting.
+            <a href="https://xgboost.readthedocs.io/en/stable/tutorials/model.html" target="_blank"
+              rel="noopener">Documentação Oficial do XGBoost</a> — Guia fundamental para compreender como árvores de
+            regressão somadas e regularizadas evitam overfitting.
           </li>
           <li>
-            <a href="https://scikit-learn.org/stable/modules/ensemble.html" target="_blank" rel="noopener">Scikit-Learn: Ensemble Methods</a> — Documentação oficial explicando a implementação prática de Bagging e Random Forest em Python.
+            <a href="https://scikit-learn.org/stable/modules/ensemble.html" target="_blank" rel="noopener">Scikit-Learn:
+              Ensemble Methods</a> — Documentação oficial explicando a implementação prática de Bagging e Random Forest
+            em Python.
           </li>
           <li>
-            <a href="https://medium.com/@brandon93.w/decision-tree-random-forest-and-xgboost-an-exploration-into-the-heart-of-machine-learning-90dc212f4948" target="_blank" rel="noopener">Brandon W. — Decision Tree, Random Forest, and XGBoost (Medium)</a> — Artigo base que sintetiza de forma intuitiva a evolução das árvores de decisão até o gradient boosting.
+            <a href="https://medium.com/@brandon93.w/decision-tree-random-forest-and-xgboost-an-exploration-into-the-heart-of-machine-learning-90dc212f4948"
+              target="_blank" rel="noopener">Brandon W. — Decision Tree, Random Forest, and XGBoost (Medium)</a> —
+            Artigo base que sintetiza de forma intuitiva a evolução das árvores de decisão até o gradient boosting.
           </li>
           <li>
-            <a href="https://www.datacamp.com/pt/tutorial/random-forests-classifier-python" target="_blank" rel="noopener">DataCamp — Random Forest em Python (Português)</a> — Tutorial prático mostrando como extrair e visualizar a importância de atributos.
+            <a href="https://www.datacamp.com/pt/tutorial/random-forests-classifier-python" target="_blank"
+              rel="noopener">DataCamp — Random Forest em Python (Português)</a> — Tutorial prático mostrando como
+            extrair e visualizar a importância de atributos.
           </li>
         </ul>
 
         <h3>📚 Referências Primárias</h3>
         <ol class="ref-list">
-          <li>CHEN, Tianqi; GUESTRIN, Carlos. <strong>XGBoost: A Scalable Tree Boosting System</strong>. In: <em>Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>, p. 785–794, 2016.</li>
+          <li>CHEN, Tianqi; GUESTRIN, Carlos. <strong>XGBoost: A Scalable Tree Boosting System</strong>. In:
+            <em>Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>,
+            p. 785–794, 2016.</li>
           <li>BREIMAN, Leo. <strong>Random Forests</strong>. <em>Machine Learning</em>, v. 45, n. 1, p. 5–32, 2001.</li>
-          <li>ONO, Andrea. <strong>Repositório de Referência: Preditor de Redes</strong>. GitHub, 2026. Disponível em: <code>https://github.com/andreaono/preditor_redes</code>.</li>
+          <li>ONO, Andrea. <strong>Repositório de Referência: Preditor de Redes</strong>. GitHub, 2026. Disponível em:
+            <code>https://github.com/andreaono/preditor_redes</code>.</li>
         </ol>
       </section>
 
@@ -541,7 +657,8 @@ xgb.fit(X_train, y_train)</code></pre>
       <section id="autores" class="section-block">
         <h2>9. Autoria e Privacidade</h2>
         <p class="privacy-note">
-          🔒 <em>Consentimento LGPD: Os 5 autores abaixo autorizaram expressamente a publicação de nome, imagem e links de perfis profissionais públicos para avaliação acadêmica.</em>
+          🔒 <em>Consentimento LGPD: Os 5 autores abaixo autorizaram expressamente a publicação de nome, imagem e links
+            de perfis profissionais públicos para avaliação acadêmica.</em>
         </p>
 
         <div class="authors-grid">
@@ -549,7 +666,8 @@ xgb.fit(X_train, y_train)</code></pre>
           <div class="author-card">
             <img src="img/Isaque.jpg" alt="Foto de Isaque Rodrigues Valim" class="author-photo">
             <h3>Isaque Rodrigues Valim</h3>
-            <p class="author-bio">Estudante de Ciência da Computação na Universidade Braz Cubas, atualmente no 4º semestre. Foco em Desenvolvimento Backend (Java, Spring Boot, Python) e tendências em Cibersegurança.</p>
+            <p class="author-bio">Estudante de Ciência da Computação na Universidade Braz Cubas, atualmente no 4º
+              semestre. Foco em Desenvolvimento Backend (Java, Spring Boot, Python) e tendências em Cibersegurança.</p>
             <div class="author-links">
               <a href="https://github.com/Isaaquevalim" target="_blank" rel="noopener">GitHub</a>
               <a href="https://www.linkedin.com/in/isaque-valim-82a231251/?isSelfProfile=true" target="_blank" rel="noopener">LinkedIn</a>
@@ -560,10 +678,12 @@ xgb.fit(X_train, y_train)</code></pre>
           <div class="author-card">
             <img src="img/eduardo.jpg" alt="Foto de Eduardo Felipe" class="author-photo">
             <h3>Eduardo Felipe Braga Silva</h3>
-            <p class="author-bio">Sou estudante de Ciência da Computação na Universidade Braz Cubas, atualmente no 4º semestre. Tenho interesse em desenvolvimento de jogos e software.</p>
+            <p class="author-bio">Sou estudante de Ciência da Computação na Universidade Braz Cubas, atualmente no 4º
+              semestre. Tenho interesse em desenvolvimento de jogos e software.</p>
             <div class="author-links">
               <a href="https://github.com/Yuoneeh" target="_blank" rel="noopener">GitHub</a>
-              <a href="https://www.linkedin.com/in/eduardo-felipe-braga-silva-65baa4334/" target="_blank" rel="noopener">LinkedIn</a>
+              <a href="https://www.linkedin.com/in/eduardo-felipe-braga-silva-65baa4334/" target="_blank"
+                rel="noopener">LinkedIn</a>
             </div>
           </div>
 
@@ -571,10 +691,13 @@ xgb.fit(X_train, y_train)</code></pre>
           <div class="author-card">
             <img src="img/ryan.jpg" alt="Foto do Integrante 3" class="author-photo">
             <h3>Ryan Catão de Paula</h3>
-            <p class="author-bio">Sou estudante de Ciência da Computação na Universidade Braz Cubas, atualmente no 4º semestre. Tenho interesse em desenvolvimento de software, programação, redes de computadores e análise de dados.</p>
+            <p class="author-bio">Sou estudante de Ciência da Computação na Universidade Braz Cubas, atualmente no 4º
+              semestre. Tenho interesse em desenvolvimento de software, programação, redes de computadores e análise de
+              dados.</p>
             <div class="author-links">
               <a href="https://github.com/ryancrdepaula-cyber" target="_blank" rel="noopener">GitHub</a>
-              <a href="https://www.linkedin.com/in/ryan-catão-7b2b26359?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" rel="noopener">LinkedIn</a>
+              <a href="https://www.linkedin.com/in/ryan-catão-7b2b26359?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+                target="_blank" rel="noopener">LinkedIn</a>
             </div>
           </div>
 
@@ -582,21 +705,26 @@ xgb.fit(X_train, y_train)</code></pre>
           <div class="author-card">
             <img src="img/gabriel.jpeg" alt="Foto do Integrante 4" class="author-photo">
             <h3>Gabriel José Couto Pereira</h3>
-            <p class="author-bio">Sou estudante de Ciência da Computação na Universidade Braz Cubas, atualmente no 4º semestre. Tenho interesse em desenvolvimento de software e análise de dados (Python e SQL).</p>
+            <p class="author-bio">Sou estudante de Ciência da Computação na Universidade Braz Cubas, atualmente no 4º
+              semestre. Tenho interesse em desenvolvimento de software e análise de dados (Python e SQL).</p>
             <div class="author-links">
               <a href="https://github.com/gabriel-couto06" target="_blank" rel="noopener">GitHub</a>
-              <a href="https://www.linkedin.com/in/gabriel-pereira-aaa944352" target="_blank" rel="noopener">LinkedIn</a>
+              <a href="https://www.linkedin.com/in/gabriel-pereira-aaa944352" target="_blank"
+                rel="noopener">LinkedIn</a>
             </div>
           </div>
 
           <!-- Integrante 5 -->
           <div class="author-card">
-            <img src="https://ui-avatars.com/api/?name=Integrante+5&background=db2777&color=fff&size=120" alt="Foto do Integrante 5" class="author-photo">
-            <h3>[Nome do Integrante 5]</h3>
-            <p class="author-bio">[Curso e Semestre]. Área de interesse: [Segurança da Informação / Front-end / IA].</p>
+            <img src="img/gschmidt.jpg" alt="Foto de Gabriel Schmidt" class="author-photo">
+            <h3>Gabriel Schmidt</h3>
+            <p class="author-bio">Sou estudante de Ciência da Computação no Centro Universitário Braz Cubas, atualmente
+              no 3º semestre, com formação prévia em Produção de Música Eletrônica. Tenho interesse e atuação em
+              desenvolvimento full-stack, redes de computadores, administração de servidores Linux e infraestrutura com
+              Docker.</p>
             <div class="author-links">
-              <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
-              <a href="https://linkedin.com/" target="_blank" rel="noopener">LinkedIn</a>
+              <a href="https://github.com/GRXMiT" target="_blank" rel="noopener">GitHub</a>
+              <a href="https://www.linkedin.com/in/gabrielrschmidt" target="_blank" rel="noopener">LinkedIn</a>
             </div>
           </div>
         </div>
@@ -608,10 +736,14 @@ xgb.fit(X_train, y_train)</code></pre>
   <!-- RODAPÉ -->
   <footer class="site-footer">
     <div class="container footer-content">
-      <p>📄 <strong>Licença:</strong> Texto sob <a href="https://creativecommons.org/licenses/by/4.0/deed.pt_BR" target="_blank" rel="noopener">CC BY 4.0</a> | Código sob licença MIT.</p>
-      <p>🔄 <strong>Última revisão:</strong> 18/10/2026 | 💻 <strong>Repositório:</strong> <a href="https://github.com/Yuoneeh/Artigo_Preditor_de_redes" target="_blank" rel="noopener">github.com/Yuoneeh/Artigo_Preditor_de_redes</a></p>
+      <p>📄 <strong>Licença:</strong> Texto sob <a href="https://creativecommons.org/licenses/by/4.0/deed.pt_BR"
+          target="_blank" rel="noopener">CC BY 4.0</a> | Código sob licença MIT.</p>
+      <p>🔄 <strong>Última revisão:</strong> 18/10/2026 | 💻 <strong>Repositório:</strong> <a
+          href="https://github.com/Yuoneeh/Artigo_Preditor_de_redes" target="_blank"
+          rel="noopener">github.com/Yuoneeh/Artigo_Preditor_de_redes</a></p>
     </div>
   </footer>
 
 </body>
+
 </html>
